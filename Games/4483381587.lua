@@ -82,7 +82,7 @@ local Window = Rayfield:CreateWindow({
 	},
 })
 
- local Tab = Window:CreateTab("Tab Example") -- Title, Image
+ local Tab = Window:CreateTab("Tab Example", icons.FluentIcons.Home) -- Title, Image
 
  local Section = Tab:CreateSection("Section Example")
 
