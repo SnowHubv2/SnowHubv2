@@ -7,28 +7,28 @@ if game.PlaceId ~= 4483381587 then return end
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Rayfield Example Window",
-    LoadingTitle = "Rayfield Interface Suite",
-    LoadingSubtitle = "by Sirius",
+    Name = "SnowHubv2 | " .. game.PlaceId.Name,
+    LoadingTitle = "SnowHubv2",
+    LoadingSubtitle = "by Snomn",
     ConfigurationSaving = {
        Enabled = true,
-       FolderName = nil, -- Create a custom folder for your hub/game
-       FileName = "Big Hub"
+       FolderName = "Snow Hubv2", -- Create a custom folder for your hub/game
+       FileName = "Configs baseplate"
     },
     Discord = {
        Enabled = false,
-       Invite = "sirius", -- The Discord invite code, do not include discord.gg/
+       Invite = "", -- The Discord invite code, do not include discord.gg/
        RememberJoins = true -- Set this to false to make them join the discord every time they load it up
     },
     KeySystem = true, -- Set this to true to use our key system
     KeySettings = {
-       Title = "Sirius Hub",
+       Title = "Snow Hubv2",
        Subtitle = "Key System",
-       Note = "Join the discord (discord.gg/sirius)",
-       FileName = "SiriusKey",
+       Note = "snowhub.key is the key",
+       FileName = "Key",
        SaveKey = true,
        GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-       Key = "Hello"
+       Key = "snowhub.key"
     }
  })
 
@@ -84,5 +84,19 @@ local Button = Tab:CreateButton({
     -- The variable (Value) is a boolean on whether the toggle is true or false
     end,
  })
+
+ local Slider = Tab:CreateSlider({
+   Name = "Slider Example",
+   Info = "Button info/Description.", -- Speaks for itself, Remove if none.
+   Range = {0, 100},
+   Increment = 10,
+   Suffix = "Bananas",
+   CurrentValue = 10,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   -- The function that takes place when the slider changes
+   -- The variable (Value) is a number which correlates to the value the slider is currently at
+   end,
+})
 
  Rayfield:LoadConfiguration()
