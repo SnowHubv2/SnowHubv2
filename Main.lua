@@ -53,7 +53,7 @@ if not isfile("/Snow Hubv2/Configs/Keybind.ROGUEHUB") then
 end
 
 local response = req({
-    Url = "https://raw.githubusercontent.com/SnowHack-Snomn/SnowHubv2/Games/" .. game.PlaceId .. ".lua",
+    Url = "https://raw.githubusercontent.com/SnowHack-Snomn/SnowHubv2/main/Games/" .. game.PlaceId .. ".lua",
     Method = "GET"
 })
 
