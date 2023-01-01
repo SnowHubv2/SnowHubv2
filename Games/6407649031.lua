@@ -50,7 +50,9 @@ local icons = {
 }
  
 if game.PlaceId ~= 6407649031 then return end
- 
+
+local localPlayer = game:GetService("Players").LocalPlayer
+
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
  
 local Window = Rayfield:CreateWindow({
@@ -94,7 +96,7 @@ _G.infJump = false
 function InfiniteJump()
     while _G.infJump == true do
         if not game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-            localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            localPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
 end
