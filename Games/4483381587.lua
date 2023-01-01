@@ -38,7 +38,6 @@ local Window = Rayfield:CreateWindow({
 	Title = "Notification Title",
 	Content = "Notification Content",
 	Duration = 6.5,
-	Image = icons.FluentIcons.Home,
 	Actions = { -- Notification Buttons
 		Ignore = {
 			Name = "Okay!",
