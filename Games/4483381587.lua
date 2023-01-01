@@ -6,7 +6,7 @@ if game.PlaceId ~= 4483381587 then return end
 
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
 
-local icons = "./Etra/Icons"
+local icons = "./Etra/iconlib"
 
 local Window = Rayfield:CreateWindow({
     Name = "SnowHubv2 | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
