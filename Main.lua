@@ -20,16 +20,6 @@ if makefolder and isfolder and not isfolder("Snow Hubv2") then
     makefolder("Snow Hubv2/Data")
 end
 
-if not isfile("/Snow Hubv2/Configs/Quotes.ROGUEHUB") then 
-    writefile("/Snow Hubv2/Configs/Quotes.ROGUEHUB", req({ Url = "https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Extra/Quotes.ROGUEHUB" }).Body);
-end
-
-if not isfile("/Snow Hubv2/Configs/Keybind.ROGUEHUB") then
-    writefile("/Snow Hubv2/Configs/Keybind.ROGUEHUB", game:GetService("HttpService"):JSONEncode({
-        Key = "RightControl"
-    }))
-end
-
 local response = req({
     Url = "https://raw.githubusercontent.com/SnowHack-Snomn/SnowHubv2/main/Games/" .. game.PlaceId .. ".lua",
     Method = "GET"
