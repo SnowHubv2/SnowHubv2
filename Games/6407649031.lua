@@ -51,7 +51,7 @@ if getgenv().SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already run
  
  if game.PlaceId ~= 6407649031 then return end
  
- local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
  
  local Window = Rayfield:CreateWindow({
      Name = "SnowHubv2 | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
