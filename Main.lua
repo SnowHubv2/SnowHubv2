@@ -14,6 +14,6 @@ if not req then
 end
 
 local response = req({
-    Url = "https://raw.githubusercontent.com/Kitzoon/Rogue-Hub/main/Games/" .. game.PlaceId .. ".lua",
+    Url = "https://raw.githubusercontent.com/SnowHack-Snomn/SnowHubv2/main/Games/" .. game.PlaceId .. ".lua",
     Method = "GET"
 })
