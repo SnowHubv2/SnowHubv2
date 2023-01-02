@@ -216,7 +216,8 @@ local Button = MiscTab:CreateButton({
 })
 
 -- Space In Misc Tab
-local SpaceLabel = MiscTab:CreateLabel("")
+local Label = MiscTab:CreateLabel("")
+
 
 -- Keybinds
 local Keybind = MiscTab:CreateKeybind({
