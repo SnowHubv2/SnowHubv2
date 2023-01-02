@@ -17,7 +17,6 @@ if makefolder and isfolder and not isfolder("Snow Hubv2") then
     makefolder("Snow Hubv2")
 
     makefolder("Snow Hubv2/Configs")
-    makefolder("Snow Hubv2/Key")
 end
 
 local response = req({
