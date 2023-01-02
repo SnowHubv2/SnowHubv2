@@ -10,6 +10,8 @@ if getconnections then
     end
 end
 
+-- CREDITS TO ROUGEHUB FOR ALMOST EVERYYHING
+
 --[[
 if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, dumbass! or maybe you just have other scripts executed.") return else
     _G.SnowHubv2_AlreadyLoaded = 0
@@ -91,11 +93,23 @@ if getgc and hookfunction then
     end
 end
 
+-- Gets The Gun Model Of A Player. Player must be the character not the Player object
+local function getGun(player)
+    if #game:GetService("Workspace").CurrentCamera:GetChildren() == 0 then return nil end
+
+    for _, v in ipairs(player:GetChildren()) do
+        if v:IsA("Model") and v:FindFirstChild("Fire") then
+            return v
+        end
+    end
+end
+
 
 -- Locals
 local localPlr = game:GetService("Players").LocalPlayer
 local camMod = require(game:GetService("ReplicatedStorage").GunSystem.GunClientAssets.Modules.Camera)
 local isTyping = false
+local isKilling = false
 
 
 -- typing detector
@@ -149,6 +163,12 @@ _G.infJump = false
 -- Bunny Hop Variables
 _G.bunnyHop = false
 
+-- Gun Mods Variables
+_G.noSpread = false
+_G.noRecoil = false
+_G.noFireRate = false
+_G.instantReload = false
+
 -- Walk Speed Variables
 _G.walkSpeed = false
 
@@ -165,6 +185,12 @@ game:GetService("RunService").RenderStepped:Connect(function()
         localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         task.wait(2)
     end
+--[[
+    if localPlr.Character and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
+        if not isKilling and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent:FindFirstChild("Humanoid") and not localPlr:GetMouse().Target.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent) ~= nil and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("Humanoid") and not localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent.Parent) ~= nil then
+            game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
+        end
+    end ]]
 end)
 
 
@@ -172,6 +198,12 @@ end)
 local HomeTab = Window:CreateTab("Home", icons.FluentIcons.Home) -- Title, Image
 
 local PlayerTab = Window:CreateTab("Player", icons.FluentIcons.Player) -- Title, Image
+
+local WeaponTab = Window:CreateTab("Weapon", icons.FluentIcons.Aimbot) -- Title, Image
+
+
+-- Sections
+local WeaponsSection = WeaponTab:CreateSection("Weapon Modifications")
 
 
 -- Buttons
@@ -226,12 +258,46 @@ local NoCameraShakeButton = PlayerTab:CreateButton({
     end
 })
 
+local TeleportButton = HomeTab:CreateButton({
+    Name = "Teleport",
+    Callback = function()
+        if localPlr.Status.Value == "Alive" and localPlr.Character:FindFirstChild("HumanoidRootPart") then
+            for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+                if v ~= localPlr and v.Status.Value == "Alive" and localPlr.Character:FindFirstChild("HumanoidRootPart") then
+                    repeat task.wait(0.4)
+                        if v.Character and v.Character:FindFirstChild("Head") then
+                            localPlr.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,6,0)
+                            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, v.Character.Head.Position)
+                            
+                            if _G.autoKill == true then
+                                game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
+                            end
+                        end
+                    until v == nil or localPlr.Status.Value == "Dead" or v.Status.Value == "Dead" or not localPlr.Character:FindFirstChild("HumanoidRootPart") or v.Character:FindFirstChild("Head") == nil or v.Character == nil
+                    
+                    task.wait(1.5)
+                end
+            end
+        end
+    end
+})
+
 
 -- Label
 local Label = PlayerTab:CreateLabel("")
 
 
 -- Toggles
+local AutoKillToggle = HomeTab:CreateToggle({
+    Name = "Auto Kill When TP Is Activated",
+    CurrentValue = false,
+    Flag = "AutoKill", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.autoKill = true
+    end,
+ })
+
+
 local InfJump = PlayerTab:CreateToggle({
     Name = "Infinite Jump",
     CurrentValue = false,
@@ -252,20 +318,85 @@ local BunnyHop = PlayerTab:CreateToggle({
 })
 
 
+local NoSpreadToggle = WeaponTab:CreateToggle({
+    Name = "No Spread",
+    CurrentValue = false,
+    Flag = "NoSpread", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.noSpread = Value
+
+        if _G.noSpread == true then
+            ModifyGuns("Spread", 0)
+        else
+            ModifyGuns("Spread", 5)
+        end
+    end,
+})
+
+local NoRecoilToggle = WeaponTab:CreateToggle({
+    Name = "No Recoil",
+    CurrentValue = false,
+    Flag = "NoRecoil", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.noRecoil = Value
+
+        if _G.noRecoil == true then
+            ModifyGuns("RecoilMult", 0)
+        else
+            ModifyGuns("RecoilMult", 4)
+        end
+    end,
+})
+
+local NoFireRateToggle = WeaponTab:CreateToggle({
+    Name = "No FireRate",
+    CurrentValue = false,
+    Flag = "NoFireRate", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.noFireRate = Value
+
+        if _G.noFireRate == true then
+            ModifyGuns("FireRate", 0)
+        else
+            ModifyGuns("FireRate", 0.25)
+        end
+    end,
+})
+
+local InstantReloadToggle = WeaponTab:CreateToggle({
+    Name = "Instant Reload",
+    CurrentValue = false,
+    Flag = "InstantReload", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.instantReload = Value
+
+        if _G.instantReload == true then
+            ModifyGuns("ReloadTime", 0)
+        else
+            ModifyGuns("ReloadTime", 0.28)
+        end
+    end,
+})
+
+
 -- Label
 local Label1 = PlayerTab:CreateLabel("")
 
 
 -- Sliders
-local WalkSpeed = PlayerTab:CreateSlider({
+local WalkSpeedSlider = PlayerTab:CreateSlider({
     Name = "Walk Speed",
     Range = {20, 240},
     Increment = 2,
     Suffix = "Speed",
     CurrentValue = 20,
-    Flag = "", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Flag = "WalkSpeed", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
-        if game:IsLoaded() then
+        if game:IsLoaded() == true then
             ModifyGuns("WalkSpeed", Value)
         end
     end,
