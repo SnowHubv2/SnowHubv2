@@ -82,11 +82,10 @@ end
 
 -- Idk anymore
 local cambobFunc
-
 if getgc and hookfunction then
     for _, v in ipairs(getgc()) do
-	    local exploitFunction = isexecutorclosure or is_synapse_function or is_exploit_function	
-		
+        local exploitFunction = isexecutorclosure or is_synapse_function or is_exploit_function	
+        
         if type(v) == "function" and not exploitFunction(v) and getinfo(v).name == "cambob" then
             cambobFunc = v
         end
@@ -155,7 +154,7 @@ Rayfield:Notify({
 
 
 -- Variables
-_G.cameraShakeDone = false
+_G.triggerBot = false
 
 -- Infinite Jump Variables
 _G.infJump = false
@@ -168,6 +167,7 @@ _G.noSpread = false
 _G.noRecoil = false
 _G.noFireRate = false
 _G.instantReload = false
+_G.infiniteClipSize = false
 
 -- Walk Speed Variables
 _G.walkSpeed = false
@@ -185,12 +185,16 @@ game:GetService("RunService").RenderStepped:Connect(function()
         localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         task.wait(2)
     end
---[[
+
+
     if localPlr.Character and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
-        if not isKilling and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent:FindFirstChild("Humanoid") and not localPlr:GetMouse().Target.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent) ~= nil and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("Humanoid") and not localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent.Parent) ~= nil then
+        if _G.triggerBot and not isKilling and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent:FindFirstChild("Humanoid") and not
+localPlr:GetMouse().Target.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent) ~= nil or _G.triggerBot and
+localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("Humanoid") and not
+localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent.Parent) ~= nil then
             game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
         end
-    end ]]
+    end
 end)
 
 
@@ -334,6 +338,7 @@ local NoSpreadToggle = WeaponTab:CreateToggle({
     end,
 })
 
+
 local NoRecoilToggle = WeaponTab:CreateToggle({
     Name = "No Recoil",
     CurrentValue = false,
@@ -349,6 +354,7 @@ local NoRecoilToggle = WeaponTab:CreateToggle({
         end
     end,
 })
+
 
 local NoFireRateToggle = WeaponTab:CreateToggle({
     Name = "No FireRate",
@@ -366,6 +372,7 @@ local NoFireRateToggle = WeaponTab:CreateToggle({
     end,
 })
 
+
 local InstantReloadToggle = WeaponTab:CreateToggle({
     Name = "Instant Reload",
     CurrentValue = false,
@@ -381,6 +388,38 @@ local InstantReloadToggle = WeaponTab:CreateToggle({
         end
     end,
 })
+
+
+local InfiniteClipSizeToggle = WeaponTab:CreateToggle({
+    Name = "Infinite Clip Size",
+    CurrentValue = false,
+    Flag = "InfiniteClipSize", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.infiniteClipSize = Value
+
+        if _G.infiniteClipSize then
+            ModifyGuns("ClipSize", math.huge)
+        else
+            ModifyGuns("ClipSize", 7)
+        end
+    end,
+})
+
+
+-- Section in WeaponTab
+local WeaponsSection = WeaponTab:CreateSection("Gun")
+
+
+-- Toggle for triggerbot
+local TriggerBotToggle = WeaponTab:CreateToggle({
+    Name = "Trigger Bot",
+    CurrentValue = false,
+    Flag = "triggerBotToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.triggerBot = true
+    end,
+ })
 
 
 -- Label
@@ -400,7 +439,35 @@ local WalkSpeedSlider = PlayerTab:CreateSlider({
             ModifyGuns("WalkSpeed", Value)
         end
     end,
- })
+})
+
+-- Keybinds
+local TeleportButtonKeybind = HomeTab:CreateKeybind({
+    Name = "Keybind For Telport Button",
+    CurrentKeybind = "K",
+    HoldToInteract = false,
+    Flag = "teleportButtonKey", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Keybind)
+        if localPlr.Status.Value == "Alive" and localPlr.Character:FindFirstChild("HumanoidRootPart") then
+            for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+                if v ~= localPlr and v.Status.Value == "Alive" and localPlr.Character:FindFirstChild("HumanoidRootPart") then
+                    repeat task.wait(0.4)
+                        if v.Character and v.Character:FindFirstChild("Head") then
+                            localPlr.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,6,0)
+                            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, v.Character.Head.Position)
+                            
+                            if _G.autoKill == true then
+                                game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
+                            end
+                        end
+                    until v == nil or localPlr.Status.Value == "Dead" or v.Status.Value == "Dead" or not localPlr.Character:FindFirstChild("HumanoidRootPart") or v.Character:FindFirstChild("Head") == nil or v.Character == nil
+                    
+                    task.wait(1.5)
+                end
+            end
+        end
+    end,
+})
 
 
 -- KEEEP!!
