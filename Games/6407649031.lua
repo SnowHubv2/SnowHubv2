@@ -16,6 +16,10 @@ end
 if game.PlaceId ~= 6407649031 then return end
 
 
+-- YUH Credits to RogueHub
+-- A lot of examples, codes and shit from there xd
+
+
 --[[
  Icons (rbxassetid://)
  Credits to Vision-UI's iconlib
