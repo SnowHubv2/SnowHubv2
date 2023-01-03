@@ -151,10 +151,16 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     end
 end)
 
+
+
 -- Player Tab Variables
 
 -- Infinite Jump
 _G.infJump = false
+
+-- Bunny Hop
+_G.bunnyHop = false
+
 
 -- Player Tab
 local PlayerTab = Window:CreateTab("Player", icons.FeatherIcons.Player) -- Title, Image
@@ -229,6 +235,15 @@ local InfJump = PlayerTab:CreateToggle({
     end,
 })
 
+local BunnyHopToggle = PlayerTab:CreateToggle({
+    Name = "Bunny Hop",
+    CurrentValue = false,
+    Flag = "BunnyHop", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.bunnyHop = Value
+    end,
+})
+
 
 -- Speed Section
 local SpeedSection = PlayerTab:CreateSection("Speed")
@@ -247,6 +262,137 @@ local WalkSpeedSlider = PlayerTab:CreateSlider({
         end
     end,
 })
+
+
+
+-- Weapon Mods
+
+-- Weapon Mods Variables
+_G.noSpread = false
+_G.noRecoil = false
+_G.noFireRate = false
+_G.instantReload = false
+_G.instantEquip = false
+_G.infiniteClipSize = false
+
+
+-- Weapon Mods tab
+local WeaponModsTab = Window:CreateTab("Weapon Mods", icons.FeatherIcons.Visuals) -- Title, Image
+
+-- Mods Section
+local ModsSection = WeaponModsTab:CreateSection("Mods")
+
+
+-- Mods:
+
+
+-- No Spread Toggle
+local NoSpreadToggle = WeaponModsTab:CreateToggle({
+    Name = "No Spread",
+    CurrentValue = false,
+    Flag = "NoSpread", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.noSpread = Value
+
+        if _G.noSpread == true then
+            ModifyGuns("Spread", 0)
+        else
+            ModifyGuns("Spread", 5)
+        end
+    end,
+})
+
+
+-- No Recoil Toggle
+local NoRecoilToggle = WeaponModsTab:CreateToggle({
+    Name = "No Recoil",
+    CurrentValue = false,
+    Flag = "NoRecoil", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.noRecoil = Value
+
+        if _G.noRecoil == true then
+            ModifyGuns("RecoilMult", 0)
+        else
+            ModifyGuns("RecoilMult", 4)
+        end
+    end,
+})
+
+
+-- No Fire-Rate Toggle
+local NoFireRateToggle = WeaponModsTab:CreateToggle({
+    Name = "No Fire-Rate",
+    CurrentValue = false,
+    Flag = "NoFireRate", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.noFireRate = Value
+
+        if _G.noFireRate == true then
+            ModifyGuns("FireRate", 0)
+        else
+            ModifyGuns("FireRate", 0.25)
+        end
+    end,
+})
+
+
+-- Instant Reload Toggle
+local InstantReloadToggle = WeaponModsTab:CreateToggle({
+    Name = "Instant Reload",
+    CurrentValue = false,
+    Flag = "InstantReload", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.instantReload = Value
+
+        if _G.instantReload == true then
+            ModifyGuns("ReloadTime", 0)
+        else
+            ModifyGuns("ReloadTime", 0.28)
+        end
+    end,
+})
+
+
+-- Instant Equip Toggle
+local InstantEquipToggle = WeaponModsTab:CreateToggle({
+    Name = "Instant Equip",
+    CurrentValue = false,
+    Flag = "InstantEquip", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.equipInstantly = Value
+
+        if _G.instantEquip == true then
+            ModifyGuns("EquipTime", 0)
+        else
+            ModifyGuns("EquipTime", 0.4)
+        end
+    end,
+})
+
+
+-- Infinite Clip Size Toggle
+local InfiniteClipSizeToggle = WeaponModsTab:CreateToggle({
+    Name = "Infinite Clip Size",
+    CurrentValue = false,
+    Flag = "InfiniteClipSize", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        if not game:IsLoaded() == true then return end
+        _G.infiniteClipSize = Value
+
+        if _G.infiniteClipSize == true then
+            ModifyGuns("ClipSize", math.huge)
+        else
+            ModifyGuns("ClipSize", 7)
+        end
+    end,
+})
+
 
 
 -- Aimbot
@@ -397,6 +543,9 @@ local TriggerBotToggle = AimbotTab:CreateToggle({
 -- Teleport Delay
 _G.tpDelay = 1
 
+-- Waiting Time
+_G.waitTime = 0.4
+
 -- Auto Kill
 _G.autoKill = false
 
@@ -405,17 +554,19 @@ _G.autoKill = false
 local MiscTab = Window:CreateTab("Misc", icons.FeatherIcons.Misc) -- Title, Image
 
 
+-- Teleport Button. Teleports you to a player and if Auto Kill is toggled, shoots and kills for you.
 local TeleportButton = MiscTab:CreateButton({
     Name = "Teleport",
     Callback = function()
         if localPlr.Status.Value == "Alive" and localPlr.Character:FindFirstChild("HumanoidRootPart") then
             for _,v in pairs(game:GetService("Players"):GetPlayers()) do
                 if v ~= localPlr and v.Status.Value == "Alive" and localPlr.Character:FindFirstChild("HumanoidRootPart") then
-                    repeat task.wait(0.4)
+                    repeat task.wait(_G.tpDelay)
                         if v.Character and v.Character:FindFirstChild("Head") then
                             localPlr.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,6,0)
                             workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, v.Character.Head.Position)
                             
+                            -- Kill if autoKill is set to true
                             if _G.autoKill == true then
                                 isKilling = true
                                 game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
@@ -424,7 +575,7 @@ local TeleportButton = MiscTab:CreateButton({
                     until v == nil or localPlr.Status.Value == "Dead" or v.Status.Value == "Dead" or not localPlr.Character:FindFirstChild("HumanoidRootPart") or v.Character:FindFirstChild("Head") == nil or v.Character == nil
                     isKilling = false
 
-                    task.wait(_G.tpDelay)
+                    task.wait(_G.waitTime)
                 end
             end
         end
@@ -432,15 +583,30 @@ local TeleportButton = MiscTab:CreateButton({
 })
 
 
+-- Teleport Delay Slider
 local TeleportDelaySlider = MiscTab:CreateSlider({
-    Name = "Teleport Delay",
-    Range = {0.5, 1.5},
+    Name = "Teleport 'n kill Delay",
+    Range = {0.2, 0.5},
     Increment = 0.1,
     Suffix = "Seconds",
     CurrentValue = 1,
     Flag = "TPDelay", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
         _G.tpDelay = Value
+    end,
+})
+
+
+-- Waiting Time Slider
+local WaitingTimeSlider = MiscTab:CreateSlider({
+    Name = "Waiting Time Between Kills",
+    Range = {0.5, 1.5},
+    Increment = 0.1,
+    Suffix = "Seconds",
+    CurrentValue = 0.4,
+    Flag = "WaitingTime", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.waitTime = Value
     end,
 })
 
