@@ -107,8 +107,9 @@ end
 -- Locals
 local localPlr = game:GetService("Players").LocalPlayer
 local camMod = require(game:GetService("ReplicatedStorage").GunSystem.GunClientAssets.Modules.Camera)
-local isTyping = false
+local mouseDown = false
 local isKilling = false
+local isTyping = false
 
 
 -- typing detector
@@ -154,13 +155,24 @@ Rayfield:Notify({
 
 
 -- Variables
+-- Aimbot Variables
+_G.aimBotTog = false
+_G.aimbotPart = false
+_G.autoLock = false
+_G.fovRadius = 150
+
+
+-- TriggerBot Variables
 _G.triggerBot = false
+
 
 -- Infinite Jump Variables
 _G.infJump = false
 
+
 -- Bunny Hop Variables
 _G.bunnyHop = false
+
 
 -- Gun Mods Variables
 _G.noSpread = false
@@ -169,12 +181,24 @@ _G.noFireRate = false
 _G.instantReload = false
 _G.infiniteClipSize = false
 
+
 -- Walk Speed Variables
 _G.walkSpeed = false
 
 
 -- Functions
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 and mouseDown == false then
+        mouseDown = true
+    else
+        mouseDown = false
+    end
+end)
+
+
 game:GetService("RunService").RenderStepped:Connect(function()
+    FOVCircle.Position = Vector2.new(localPlr:GetMouse().X, localPlr:GetMouse().Y + 36)
+
     -- Infinite Jump Function
     if not isTyping and _G.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
         localPlr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -186,16 +210,46 @@ game:GetService("RunService").RenderStepped:Connect(function()
         task.wait(2)
     end
 
-
-    if localPlr.Character and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
-        if _G.triggerBot and not isKilling and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent:FindFirstChild("Humanoid") and not
+    -- TriggerBot Function
+    if localPlr.Character and game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 then
+        if _G.triggerBot == true and not isKilling and localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent:FindFirstChild("Humanoid") and not
 localPlr:GetMouse().Target.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent) ~= nil or _G.triggerBot and
 localPlr:GetMouse().Target and localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("Humanoid") and not
 localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("ForceField") and getGun(localPlr:GetMouse().Target.Parent.Parent) ~= nil then
             game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
         end
     end
+
+    if _G.aimBotTog == true and not isKilling and mouseDown or _G.aimBotTog == true and _G.autoLock then
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player ~= localPlr and player.Character and player.Status.Value ~= "Dead" and not player.Character:FindFirstChild("ForceField") and player.Character:FindFirstChild(_G.aimbotPart) then
+                local partPos, onScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(player.Character[_G.aimbotPart].Position)
+                local obsParts = game:GetService("Workspace").CurrentCamera:GetPartsObscuringTarget({player.Character[_G.aimbotPart].Position}, {game:GetService("Workspace").CurrentCamera, localPlr.Character, player.Character})
+
+                if onScreen and #obsParts == 0 then
+                    local distance = math.huge
+                    local mag = (Vector2.new(localPlr:GetMouse().X, localPlr:GetMouse().Y) - Vector2.new(partPos.X, partPos.Y)).magnitude
+                    
+                    if mag < distance and mag < _G.fovRadius then
+                        distance = mag
+                        closestPlayer = player.Character
+                        game:GetService("Workspace").CurrentCamera.CFrame = CFrame.new(game:GetService("Workspace").CurrentCamera.CFrame.Position, closestPlayer[_G.aimbotPart].Position)
+                    end
+                end
+            end
+        end
+    end
 end)
+
+
+FOVCircle = Drawing.new("Circle")
+
+FOVCircle.Visible = false
+FOVCircle.Radius = 150
+FOVCircle.Color = Color3.fromRGB(255,255,255)
+FOVCircle.Thickness = 2
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
 
 
 -- Tabs
@@ -274,11 +328,13 @@ local TeleportButton = HomeTab:CreateButton({
                             workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, v.Character.Head.Position)
                             
                             if _G.autoKill == true then
+                                isKilling = true
                                 game:GetService("VirtualUser"):ClickButton1(Vector2.new(-100,-100))
                             end
                         end
                     until v == nil or localPlr.Status.Value == "Dead" or v.Status.Value == "Dead" or not localPlr.Character:FindFirstChild("HumanoidRootPart") or v.Character:FindFirstChild("Head") == nil or v.Character == nil
-                    
+                    isKilling = false
+
                     task.wait(1.5)
                 end
             end
@@ -469,6 +525,7 @@ local TeleportButtonKeybind = HomeTab:CreateKeybind({
     end,
 })
 
+local AimbotScetion = WeaponTab:CreateSection("Aimbot")
 
 -- KEEEP!!
 Rayfield:LoadConfiguration()
