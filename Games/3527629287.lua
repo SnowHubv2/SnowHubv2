@@ -1,3 +1,8 @@
+if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, dumbass! or maybe you just have other scripts executed.") return else
+    _G.SnowHubv2_AlreadyLoaded = 0
+end
+
+
 repeat task.wait() until game:IsLoaded()
 if not hookmetamethod then game.Players.LocalPlayer:Kick('your exploit is not supported') end
 
@@ -51,26 +56,27 @@ local function getClosestPlayerToCursor(fov)
     return closestPlayer
 end
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+-- ESP made by me :)
 local Highlight = Instance.new("Highlight")
 Highlight.Name = "Highlight"
 
-function ApplyToCurrentPlayers()
-    for i, player in pairs(Players:GetChildren()) do 
-        repeat wait() until player.Character
-        if not player.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
-            local HighlightClone = Highlight:Clone()
-            HighlightClone.Adornee = player.Character
-            HighlightClone.Parent = player.Character:FindFirstChild("HumanoidRootPart")
-            HighlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            HighlightClone.Name = "Highlight"
+function ApplyToCurrentEnemyPlayers()
+    for i,v in pairs(game.Players:GetPlayers()) do
+        if v.Team ~= game.Players.LocalPlayer.Team then
+            repeat wait() until v.Character
+            if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
+                local HighlightClone = Highlight:Clone()
+                HighlightClone.Adornee = v.Character
+                HighlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart")
+                HighlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                HighlightClone.Name = "Highlight"
+            end
         end
     end
 end    
 
 RunService.Heartbeat:Connect(function()
-    ApplyToCurrentPlayers()
+    ApplyToCurrentEnemyPlayers()
 end)
 
 
