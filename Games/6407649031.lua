@@ -1,6 +1,7 @@
+--[[ 
 if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, dumbass! or maybe you just have other scripts executed.") return else
     _G.SnowHubv2_AlreadyLoaded = 0
-end
+end ]]
 
 
 -- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
@@ -104,6 +105,7 @@ local camMod = require(game:GetService("ReplicatedStorage").GunSystem.GunClientA
 local mouseDown = false
 local isKilling = false
 local isTyping = false
+local espColor
 
 -- Typing detector
 game:GetService("UserInputService").InputBegan:Connect(function(input, typing)
@@ -270,6 +272,298 @@ local WalkSpeedSlider = PlayerTab:CreateSlider({
 
 
 
+-- Aimbot
+
+-- Aimbot Variables
+_G.aimBotTog = false
+_G.aimbotPart = "Head"
+_G.autoLock = false
+
+-- FOV Variables
+_G.fovShow = false
+_G.fovRadius = 150
+_G.fovColor = Color3.fromRGB(255,255,255)
+_G.rainbowFOV = false
+
+
+-- Aimbot Tab
+local AimbotTab = Window:CreateTab("Aimbot", icons.FeatherIcons.Aimbot) -- Title, Image
+
+
+-- Aiming Section
+local AimingSection = AimbotTab:CreateSection("Aiming")
+
+
+-- Aimbot Toggle
+local AimbotToggle = AimbotTab:CreateToggle({
+    Name = "Aimbot",
+    CurrentValue = false,
+    Flag = "Aimbot", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.aimBotTog = Value
+    end,
+})
+
+
+-- What Part Aimbot Aims At
+-- Aimbot Part Dropdown
+local AimbotPartdropdown = AimbotTab:CreateDropdown({
+    Name = "Part To Aim At",
+    Options = {"Head","Chest"},
+    CurrentOption = "Head",
+    Flag = "AimbotPart", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Option)
+        if Option == "Chest" then
+            _G.aimbotPart = "HumanoidRootPart"
+        else
+            _G.aimbotPart = Option
+        end
+    end,
+})
+
+
+-- Auto Lock On Player Toggle
+local AutoLockoggle = AimbotTab:CreateToggle({
+    Name = "AutoLock",
+    CurrentValue = false,
+    Flag = "AutoLock", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.autoLock = Value
+    end,
+})
+
+
+-- FOV Section
+local FOVSection = AimbotTab:CreateSection("FOV Circle")
+
+
+-- Drawing Circle (FOV)
+FOVCircle = Drawing.new("Circle")
+
+-- Circle Properties
+FOVCircle.Visible = false
+FOVCircle.Radius = _G.fovRadius or 300
+FOVCircle.Color = Color3.fromRGB(_G.fovColor or 255, 255, 255)
+FOVCircle.Thickness = 2
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
+
+
+-- FOV Show Toggle
+local FOVToggle = AimbotTab:CreateToggle({
+    Name = "FOV",
+    CurrentValue = false,
+    Flag = "FOV",
+    Callback = function(Value)
+        _G.fovShow = Value
+
+        FOVCircle.Visible = _G.fovShow
+    end,
+})
+
+
+-- FOV Radius Slider
+local FOVRadiusSlider = AimbotTab:CreateSlider({
+    Name = "FOV Radius",
+    Range = {0, 300},
+    Increment = 1,
+    Suffix = "Radius",
+    CurrentValue = 150,
+    Flag = "FOVRadius",
+    Callback = function(Value)
+        _G.fovRadius = Value
+
+        FOVCircle.Radius = _G.fovRadius
+    end,
+})
+
+
+-- FOV Color Picker
+local FOVColorPicker = AimbotTab:CreateColorPicker({
+    Name = "FOV Color Picker",
+    Color = Color3.fromRGB(255,255,255),
+    Flag = "FOVColor",
+    Callback = function(Value)
+        _G.fovColor = Value
+
+        FOVCircle.Color = _G.fovColor
+    end
+})
+
+
+-- FOV Rainbow Color Toggle
+local RainbowFOVToggle = AimbotTab:CreateToggle({
+    Name = "Rainbow FOV",
+    CurrentValue = false,
+    Flag = "RainBowFOV",
+    Callback = function(Value)
+        _G.rainbowFOV = Value
+    end,
+})
+
+
+-- Trigger Section HEHEHHE
+local TriggerSection = AimbotTab:CreateSection("Trigger Help ;)")
+
+-- Toggle for triggerbot
+local TriggerBotToggle = AimbotTab:CreateToggle({
+    Name = "Trigger Bot",
+    CurrentValue = false,
+    Flag = "triggerBot", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.triggerBot = Value
+    end,
+})
+
+
+
+-- Visuals
+
+-- Visuals Variables
+_G.playerESP = false
+_G.distanceESP = false
+
+_G.espTextSize = 15
+
+_G.espColor = Color3.fromRGB(255, 255, 255)
+_G.espRainbow = false
+
+
+-- ESP Function
+local function esp(object, text, color)
+    local espText = Drawing.new("Text")
+    espText.Visible = false
+    espText.Center = true
+    espText.Outline = true
+    espText.Font = 3
+    espText.Color = color
+    
+    if _G.playerESP == false and espText and connection then
+        espText.Visible = false
+        espText:Remove()
+        connection:Disconnect()
+    end
+    
+    local connection
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
+        if object.Parent ~= nil and _G.playerESP and not object.Parent:FindFirstChild("Highlight") then
+            local objectPos, onScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(object.Position)
+            local targetDistance = (object.Position - game:GetService("Workspace").CurrentCamera.CFrame.Position).magnitude
+            
+            if onScreen and _G.playerESP and targetDistance < 1000 and espText and #game:GetService("Workspace").CurrentCamera:GetChildren() ~= 0 and not object.Parent:FindFirstChild("ForceField") then
+                espText.Position = Vector2.new(objectPos.X, objectPos.Y + math.clamp(targetDistance / 10,10,30) -10)
+
+                if _G.distanceESP then
+                    espText.Text = text .. " | " .. tostring(math.floor(targetDistance)) .. " meters"
+                else
+                    espText.Text = text
+                end
+                
+                if _G.espRainbow then
+                    espText.Color = espColor
+                end
+                
+                espText.Visible = true
+                espText.Size = _G.espTextSize
+            else
+                if espText then
+                    espText.Visible = false
+                end
+            end
+        else
+            espText.Visible = false
+            espText:Remove()
+            connection:Disconnect()
+        end
+    end)
+end
+
+
+local VisualsTab = Window:CreateTab("Visuals", icons.FeatherIcons.Visuals) -- Title, Image
+
+-- Player ESP Toggle
+local ESPToggle = VisualsTab:CreateToggle({
+    Name = "Player ESP",
+    CurrentValue = false,
+    Flag = "PlayerESP",
+    Callback = function(Value)
+        _G.playerESP = Value
+
+        if _G.playerESP == true and game:IsLoaded() == true then
+            for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+                if player ~= localPlr and player.Character and _G.playerESP == true then
+                    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
+                    
+                    player.CharacterAdded:Connect(function(playerChar)
+                        esp(playerChar:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
+                    end)
+                end
+            end
+        end
+    end,
+})
+
+game:GetService("Players").PlayerAdded:Connect(function(player)
+	if player ~= localPlr and player.Character and _G.playerESP == true then
+	    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
+	elseif player ~= localPlr and _G.playerESP == true then
+        player.CharacterAdded:Connect(function(playerChar)
+    	    esp(player.Character:WaitForChild("Head"), player.Name, Color3.fromRGB(255,255,255))
+        end)
+    end
+end)
+
+
+-- Rainbow ESP Toggle
+local RainbowESPToggle = VisualsTab:CreateToggle({
+    Name = "Rainbow ESP",
+    CurrentValue = false,
+    Flag = "RainbowESP",
+    Callback = function(Value)
+        _G.espRainbow = Value
+
+        print(Value)
+    end,
+})
+
+
+-- Distance ESP Toggle
+local DistanceESPToggle = VisualsTab:CreateToggle({
+    Name = "Distance ESP",
+    CurrentValue = false,
+    Flag = "DistanceESP",
+    Callback = function(Value)
+        _G.distanceESP = Value
+    end,
+})
+
+-- ESP Color Picker
+local ESPColorPicker = VisualsTab:CreateColorPicker({
+    Name = "ESP Color",
+    Color = Color3.fromRGB(1,0,0),
+    Flag = "ESPColor",
+    Callback = function(Value)
+        _G.espColor = Value
+
+        espColor = _G.espColor
+    end
+})
+
+-- Font Size Slider
+local FontSizeSlider = VisualsTab:CreateSlider({
+    Name = "ESP Font Size",
+    Range = {10, 100},
+    Increment = 1,
+    Suffix = "Size",
+    CurrentValue = 15,
+    Flag = "FontSize",
+    Callback = function(Value)
+        _G.espTextSize = Value
+    end,
+})
+
+
+
 -- Weapon Mods
 
 -- Weapon Mods Variables
@@ -400,149 +694,6 @@ local InfiniteClipSizeToggle = WeaponModsTab:CreateToggle({
 
 
 
--- Aimbot
-
--- Aimbot Variables
-_G.aimBotTog = false
-_G.aimbotPart = "Head"
-_G.autoLock = false
-
--- FOV Variables
-_G.fovShow = false
-_G.fovRadius = 150
-_G.fovColor = Color3.fromRGB(255,255,255)
-_G.rainbowFOV = false
-
-
--- Aimbot Tab
-local AimbotTab = Window:CreateTab("Aimbot", icons.FeatherIcons.Aimbot) -- Title, Image
-
-
--- Aiming Section
-local AimingSection = AimbotTab:CreateSection("Aiming")
-
-
--- Aimbot Toggle
-local AimbotToggle = AimbotTab:CreateToggle({
-    Name = "Aimbot",
-    CurrentValue = false,
-    Flag = "Aimbot", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Value)
-        _G.aimBotTog = Value
-    end,
-})
-
-
--- What Part Aimbot Aims At
--- Aimbot Part Dropdown
-local AimbotPartdropdown = AimbotTab:CreateDropdown({
-    Name = "Part To Aim At",
-    Options = {"Head","Chest"},
-    CurrentOption = "Head",
-    Flag = "AimbotPart", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Option)
-        if Option == "Chest" then
-            _G.aimbotPart = "HumanoidRootPart"
-        else
-            _G.aimbotPart = Option
-        end
-    end,
-})
-
-
--- Auto Lock On Player Toggle
-local AutoLockoggle = AimbotTab:CreateToggle({
-    Name = "AutoLock",
-    CurrentValue = false,
-    Flag = "AutoLock", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Value)
-        _G.autoLock = Value
-    end,
-})
-
-
--- FOV Section
-local FOVSection = AimbotTab:CreateSection("FOV Circle")
-
-
--- Drawing Circle (FOV)
-FOVCircle = Drawing.new("Circle")
-
--- Circle Properties
-FOVCircle.Visible = false
-FOVCircle.Radius = _G.fovRadius or 300
-FOVCircle.Color = Color3.fromRGB(_G.fovColor or 255, 255, 255)
-FOVCircle.Thickness = 2
-FOVCircle.Filled = false
-FOVCircle.Transparency = 1
-
-
--- FOV Show Toggle
-local FOVToggle = AimbotTab:CreateToggle({
-    Name = "FOV",
-    CurrentValue = false,
-    Flag = "FOV",
-    Callback = function(Value)
-        _G.fovShow = Value
-
-        FOVCircle.Visible = _G.fovShow
-    end,
-})
-
-
--- FOV Radius Slider
-local FOVRadiusSlider = AimbotTab:CreateSlider({
-    Name = "FOV Radius",
-    Range = {0, 300},
-    Increment = 1,
-    Suffix = "Radius",
-    CurrentValue = 150,
-    Flag = "FOVRadius",
-    Callback = function(Value)
-        _G.fovRadius = Value
-
-        FOVCircle.Radius = _G.fovRadius
-    end,
-})
-
-
--- FOV Color Picker
-local FOVColorPicker = AimbotTab:CreateColorPicker({
-    Name = "FOV Color Picker",
-    Color = Color3.fromRGB(255,255,255),
-    Flag = "FOVColor",
-    Callback = function(Value)
-        _G.fovColor = Value
-
-        FOVCircle.Color = _G.fovColor
-    end
-})
-
-
--- FOV Rainbow Color Toggle
-local RainbowFOVToggle = AimbotTab:CreateToggle({
-    Name = "Rainbow FOV",
-    CurrentValue = false,
-    Flag = "RainBowFOV",
-    Callback = function(Value)
-        _G.rainbowFOV = Value
-    end,
-})
-
--- Trigger Section HEHEHHE
-local TriggerSection = AimbotTab:CreateSection("Trigger Help ;)")
-
--- Toggle for triggerbot
-local TriggerBotToggle = AimbotTab:CreateToggle({
-    Name = "Trigger Bot",
-    CurrentValue = false,
-    Flag = "triggerBot", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Value)
-        _G.triggerBot = Value
-    end,
-})
-
-
 -- Misc Tab Variables
 
 -- Teleport Delay
@@ -644,6 +795,15 @@ game:GetService("RunService").RenderStepped:Connect(function()
         FOVColorPicker:Set(rainbow)    
     end
 
+    -- Same shit as FOV Rainbow
+    if _G.espRainbow then
+        local hue = tick() % 10 / 10
+        local rainbow = Color3.fromHSV(hue, 1, 1)
+        
+        ESPColorPicker:Set(rainbow)
+        espColor = rainbow
+    end
+
 
     -- Infinite Jump Function
     if not isTyping and _G.infJump and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
@@ -691,6 +851,7 @@ localPlr:GetMouse().Target.Parent.Parent:FindFirstChild("ForceField") and getGun
         end
     end
 end)
+
 
 
 -- KEEEP!!
