@@ -4,7 +4,7 @@ if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, d
 end ]]
 
 
--- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
+-- Epic Anti Cheat Bypass i "found" ;)
 
 if getconnections then
     for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
