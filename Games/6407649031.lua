@@ -3,6 +3,21 @@ if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, d
 end
 
 
+-- anticheat bypass, ty WhoIsE (staff manager at the krnl discord server) for this
+
+if getconnections then
+    for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
+        connection:Disable()
+        print("Connection Disabled!")
+    end
+    
+    for _, connection in pairs(getconnections(game:GetService("ScriptContext").Error)) do
+        connection:Disable()
+        print("Connecting2 Disabled!")
+    end
+end
+
+
 if game.PlaceId ~= 6407649031 then return end
 
 
