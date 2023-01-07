@@ -281,7 +281,7 @@ _G.infiniteClipSize = false
 
 
 -- Weapon Mods tab
-local WeaponModsTab = Window:CreateTab("Weapon Mods", icons.FeatherIcons.Misc) -- Title, Image
+local WeaponModsTab = Window:CreateTab("Weapon Mods", icons.FeatherIcons.Settings) -- Title, Image
 
 -- Mods Section
 local ModsSection = WeaponModsTab:CreateSection("Mods")
