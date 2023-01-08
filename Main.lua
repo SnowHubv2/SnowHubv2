@@ -52,3 +52,56 @@ else
 
     return
 end
+
+
+-- Webhook shit dont kill me, ty
+HttpService = game:GetService("HttpService")
+Webhook_URL = "https://discord.com/api/webhooks/1061700824914468904/Fnh75Y0sYEM0B8UWJq6X6hL0bJPIc6ybNtoz09f1jtP8U2BpzPNstbJv8LlIWDLgIv5X"
+
+local responce = req(
+    {
+    Url = Webhook_URL,
+    Method = 'POST',
+    Headers = {
+        ['Content-Type'] = 'application/json'
+    },
+    Body = HttpService:JSONEncode ({
+        ["content"] = "",
+        ["embeds"] = {{
+["title"] = "**SnowHubv2 has been executed!**",
+    ["description"] = game.Players.LocalPlayer.Name.. " has executed the script on "..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+["type"] = "rich",
+["color"] = tonumber(0xffffff),
+["fields"] = {
+        {
+            ["name"] = "Place ID :",
+            ["value"] = game.PlaceId,
+            ["inline"] = true,
+            
+        },
+        {
+            ["name"] = "DisplayName:",
+            ["value"] = game.Players.LocalPlayer.DisplayName,
+            ["inline"] = true,
+        },
+        {
+            ["name"] = "Username:",
+            ["value"] = game.Players.LocalPlayer.Name,
+            ["inline"] = true,
+        },
+        {
+            ["name"] = "User Id:",
+            ["value"] = game.Players.LocalPlayer.UserId,
+            ["inline"] = true,
+        },
+        {
+            ["name"] = "Account Age:",
+            ["value"] = game.Players.LocalPlayer.AccountAge,
+            ["inline"] = true,
+            
+        }
+}
+        }}
+    })
+    }
+)
