@@ -1,7 +1,6 @@
---[[ 
 if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, dumbass! or maybe you just have other scripts executed.") return else
     _G.SnowHubv2_AlreadyLoaded = 0
-end ]]
+end
 
 
 -- Epic Anti Cheat Bypass i "found" ;)
