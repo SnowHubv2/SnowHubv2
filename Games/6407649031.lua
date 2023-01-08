@@ -1,6 +1,7 @@
+--[[ 
 if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, dumbass! or maybe you just have other scripts executed.") return else
     _G.SnowHubv2_AlreadyLoaded = 0
-end
+end ]]
 
 
 -- Epic Anti Cheat Bypass i "found" ;)
@@ -128,7 +129,7 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {
        Enabled = true,
        FolderName = "Snow Hubv2", -- Create a custom folder for your hub/game
-       FileName = "NoScopeArcade"
+       FileName = "NoScopeArcade_Config"
     },
     Discord = {
        Enabled = false,
