@@ -1,7 +1,6 @@
---[[ 
 if _G.SnowHubv2_AlreadyLoaded ~= nil then error("SnowHubv2 is already running, dumbass! or maybe you just have other scripts executed.") return else
     _G.SnowHubv2_AlreadyLoaded = 0
-end ]]
+end
 
 
 -- Epic Anti Cheat Bypass i "found" ;)
@@ -89,6 +88,7 @@ if getgc and hookfunction then
     end
 end
 
+
 -- Gets The Gun Model Of A Player. Player must be the character not the Player object
 local function getGun(player)
     if #game:GetService("Workspace").CurrentCamera:GetChildren() == 0 then return nil end
@@ -100,12 +100,15 @@ local function getGun(player)
     end
 end
 
+
 local localPlr = game:GetService("Players").LocalPlayer
 local camMod = require(game:GetService("ReplicatedStorage").GunSystem.GunClientAssets.Modules.Camera)
+local version = "v1.1"
 local mouseDown = false
 local isKilling = false
 local isTyping = false
 local espColor
+
 
 -- Typing detector
 game:GetService("UserInputService").InputBegan:Connect(function(input, typing)
@@ -119,13 +122,13 @@ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shle
 
 -- Window
 local Window = Rayfield:CreateWindow({
-    Name = "SnowHubv2 | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+    Name = "SnowHubv2 | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name .. " " .. version,
     LoadingTitle = "SnowHubv2",
     LoadingSubtitle = "by Snomn",
     ConfigurationSaving = {
        Enabled = true,
        FolderName = "Snow Hubv2", -- Create a custom folder for your hub/game
-       FileName = "Configs_NoScopeArcade"
+       FileName = "NoScopeArcade"
     },
     Discord = {
        Enabled = false,
@@ -136,12 +139,20 @@ local Window = Rayfield:CreateWindow({
     KeySettings = {
         Title = "Snow Hubv2",
         Subtitle = "Key System",
-        Note = "snowhub.key is the key",
+        Note = "Key System is under development. Currently the key is 'snowhub.key', in one word",
         FileName = "Key",
         SaveKey = true,
         GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
         Key = "snowhub.key"
     }
+})
+
+-- Starting Notification
+Rayfield:Notify({
+    Title = "SnowHubv2",
+    Content = "SnowHubv2 Has Launched!",
+    Duration = 5,
+    Image = icons.NotificationIcons.Success,
 })
 
 
@@ -170,7 +181,7 @@ _G.bunnyHop = false
 
 
 -- Player Tab
-local PlayerTab = Window:CreateTab("Player", icons.FeatherIcons.Player) -- Title, Image
+local PlayerTab = Window:CreateTab("Player", icons.FeatherIcons.Player)
 
 
 -- Camera Modifications Section
@@ -661,7 +672,7 @@ local InstantReloadToggle = WeaponModsTab:CreateToggle({
 local InstantEquipToggle = WeaponModsTab:CreateToggle({
     Name = "Instant Equip",
     CurrentValue = false,
-    Flag = "InstantEquip", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Flag = "InstantEquip",
     Callback = function(Value)
         if not game:IsLoaded() == true then return end
         _G.equipInstantly = Value
@@ -679,7 +690,7 @@ local InstantEquipToggle = WeaponModsTab:CreateToggle({
 local InfiniteClipSizeToggle = WeaponModsTab:CreateToggle({
     Name = "Infinite Clip Size",
     CurrentValue = false,
-    Flag = "InfiniteClipSize", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Flag = "InfiniteClipSize",
     Callback = function(Value)
         if not game:IsLoaded() == true then return end
         _G.infiniteClipSize = Value
@@ -688,6 +699,77 @@ local InfiniteClipSizeToggle = WeaponModsTab:CreateToggle({
             ModifyGuns("ClipSize", math.huge)
         else
             ModifyGuns("ClipSize", 7)
+        end
+    end,
+})
+
+
+-- Teleport Tab Variables
+
+-- Specific Teleport Location Value
+_G.specificTPLoc = CFrame.new(0, 0, 0)
+
+-- Vertical Teleport Value
+_G.VerticalTPLoc = CFrame.new(0, 0, 0)
+
+
+-- Teleport Tab
+local TeleportTab = Window:CreateTab("Teleport", icons.FluentIcons.Misc)
+
+
+-- Specific TP Section
+local SpecificTPSection = TeleportTab:CreateSection("Specific TP")
+
+
+-- Specific Location Teleport Button
+local TeleportSpecificButton = TeleportTab:CreateButton({
+    Name = "Teleport",
+    Callback = function()
+        localPlr.Character.HumanoidRootPart.CFrame = _G.specificTPLoc
+    end,
+})
+
+
+-- Specific Location Teleport Locations Dropdown
+local SpecificTPDropdown = TeleportTab:CreateDropdown({
+    Name = "Specific TP Locations",
+    Options = {"Center Roof","Spawn"},
+    CurrentOption = "Center Roof",
+    Flag = "Specific_Teleport_Dropdown",
+    Callback = function(Option)
+        if Option == "Center Roof" then
+            _G.specificTPLoc = CFrame.new(0, 110, 0)
+        elseif Option == "Spawn" then
+            _G.specificTPLoc = CFrame.new(114, 18, 137)
+        end
+    end,
+})
+
+
+-- Up And Down Teleport Section
+local UpAndDownTPSection = TeleportTab:CreateSection("Up Or Down? Teleport")
+
+
+-- Up Or Down Teleport Button
+local UpOrDownTeleportButton = TeleportTab:CreateButton({
+    Name = "Teleport",
+    Callback = function()
+        localPlr.Character.HumanoidRootPart.CFrame = localPlr.Character.HumanoidRootPart.CFrame  * _G.VerticalTPLoc
+    end,
+})
+
+
+-- Up Or Down? Dropdown
+local UpOrDownTPDropdown = TeleportTab:CreateDropdown({
+    Name = "Up Or Down?",
+    Options = {"Up","Down"},
+    CurrentOption = "Up",
+    Flag = "Up_Or_Down_Teleport_DropDown",
+    Callback = function(Option)
+        if Option == "Up" then
+            _G.VerticalTPLoc = CFrame.new(0, 60, 0)
+        elseif Option == "Down" then
+            _G.VerticalTPLoc = CFrame.new(0, -10, 0)
         end
     end,
 })
@@ -759,8 +841,8 @@ local WaitingTimeSlider = MiscTab:CreateSlider({
     Range = {0.5, 1.5},
     Increment = 0.1,
     Suffix = "Seconds",
-    CurrentValue = 0.4,
-    Flag = "WaitingTime", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    CurrentValue = 1,
+    Flag = "TPWaitingTime", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
         _G.waitTime = Value
     end,
