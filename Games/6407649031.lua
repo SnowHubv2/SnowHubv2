@@ -8,12 +8,12 @@ end
 if getconnections then
     for _, connection in pairs(getconnections(game:GetService("LogService").MessageOut)) do
         connection:Disable()
-        print("Connection Disabled!")
+        print("Connection LogService Disabled!")
     end
     
     for _, connection in pairs(getconnections(game:GetService("ScriptContext").Error)) do
         connection:Disable()
-        print("Connecting2 Disabled!")
+        print("Connection ScriptContext Disabled!")
     end
 end
 
@@ -101,6 +101,8 @@ local function getGun(player)
 end
 
 
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
 local localPlr = game:GetService("Players").LocalPlayer
 local camMod = require(game:GetService("ReplicatedStorage").GunSystem.GunClientAssets.Modules.Camera)
 local version = "v1.1"
@@ -108,6 +110,7 @@ local mouseDown = false
 local isKilling = false
 local isTyping = false
 local espColor
+local Clipon = false
 
 
 -- Typing detector
@@ -787,6 +790,9 @@ _G.waitTime = 0.4
 -- Auto Kill
 _G.autoKill = false
 
+-- No CLip
+_G.NoClip = false
+
 
 -- Misc Tab
 local MiscTab = Window:CreateTab("Misc", icons.FeatherIcons.Misc) -- Title, Image
@@ -856,6 +862,38 @@ local AutoKillToggle = MiscTab:CreateToggle({
     Flag = "AutoKill", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
         _G.autoKill = Value
+    end,
+})
+
+
+local EmptySection = MiscTab:CreateSection("")
+
+
+
+local NoClipToggle = MiscTab:CreateToggle({
+    Name = "No Clip",
+    CurrentValue = false,
+    Flag = "NoClip", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        _G.NoClip = Value
+
+        if _G.NoClip == true then
+            Clipon = true
+            Stepped = game:GetService("RunService").Stepped:Connect(function()
+                if not Clipon == false then
+                    for a, b in pairs(Workspace:GetChildren()) do
+                    if b.Name == localPlr.Name then
+                    for i, v in pairs(Workspace[localPlr.Name]:GetChildren()) do
+                    if v:IsA("BasePart") then
+                    v.CanCollide = false
+                    end end end end
+                else
+                    Stepped:Disconnect()
+                end
+            end)
+        elseif _G.NoClip == false then
+            Clipon = false
+        end
     end,
 })
 
