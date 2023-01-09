@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/SnowHubv2/SnowHubv2/main/Main.lua"))()
+loadstring(game:HttpGet("https://pastebin.com/raw/WZnPL6jK"))()
