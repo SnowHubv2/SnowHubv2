@@ -8,6 +8,7 @@ if not hookmetamethod then game.Players.LocalPlayer:Kick('your exploit is not su
 
 if game.PlaceId ~= 3527629287 then return end
 
+
 local players = game:GetService('Players')
 local RunService = game:GetService('RunService')
 local Teams = game:GetService('Teams')
@@ -56,63 +57,169 @@ local function getClosestPlayerToCursor(fov)
     return closestPlayer
 end
 
--- ESP made by me :)
-local Highlight = Instance.new("Highlight")
-Highlight.Name = "Highlight"
 
-function ApplyToCurrentEnemyPlayers()
-    for i,v in pairs(game.Players:GetPlayers()) do
-        if v.Team ~= game.Players.LocalPlayer.Team then
-            repeat wait() until v.Character
-            if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
-                local HighlightClone = Highlight:Clone()
-                HighlightClone.Adornee = v.Character
-                HighlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart")
-                HighlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                HighlightClone.Name = "Highlight"
+--[[
+ Icons (rbxassetid://)
+ Credits to Vision-UI's iconlib
+ All icons in here are from there ]]
+ local icons = {
+    FluentIcons = {
+        Home = 9792462652,
+        Aimbot = 9766671041,
+        Visuals = 9766673555,
+        Player = 9766672602,
+        Misc = 9766671943,
+        Settings = 9766674082,
+        Credits = 9766675093,
+        Exit = 9766676906
+    },
+    FeatherIcons = {
+        Home = 9792650361,
+        Aimbot = 9792632523,
+        Visuals = 9792631281,
+        Player = 9792631906,
+        Misc = 9792634811,
+        Settings = 9792633222,
+        Credits = 9792634075,
+        Exit = 9792635572
+    },
+    NotificationIcons = {
+        Success = 9838874163,
+        Warning = 9838873385,
+        Error = 9838876113,
+        Informational = 9838877673,
+        Custom = 9838878267
+    }
+}
+
+
+
+local version = "v1.1"
+local localPlr = game:GetService("Players").LocalPlayer
+
+
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+
+
+-- Window
+local Window = Rayfield:CreateWindow({
+    Name = "SnowHubv2 | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name .. " " .. version,
+    LoadingTitle = "SnowHubv2",
+    LoadingSubtitle = "by Snomn",
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = "Snow Hubv2/Configs", -- Create a custom folder for your hub/game
+       FileName = "BigPaintball_Config"
+    },
+    Discord = {
+       Enabled = false,
+       Invite = "sirius", -- The Discord invite code, do not include discord.gg/
+       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+    },
+    KeySystem = false, -- Set this to true to use our key system
+    KeySettings = {
+        Title = "Snow Hubv2",
+        Subtitle = "Key System",
+        Note = "Key System is under development. Currently the key is 'snowhub.key', in ONE word",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+        Key = "snowhub.key"
+    }
+})
+
+
+local MainTab = Window:CreateTab("Main") -- Title, Image
+
+
+local AimbotAndFOVButton = MainTab:CreateButton({
+    Name = "Silent Aim & FOV",
+    Info = "Gives you aimbot and draws an FOV on your screen",
+    Interact = 'desc',
+    Callback = function()
+        shared.fov = 400
+        local circle = Drawing.new('Circle')
+        circle.Thickness = 2
+        circle.NumSides = 12
+        circle.Radius = shared.fov or 400
+        circle.Filled = false
+        circle.Transparency = 1
+        circle.Color = Color3.new(1, 0, 0.384313)
+        circle.Visible = true
+        local target = nil
+        RunService.Heartbeat:Connect(function(deltaTime)
+            task.wait(deltaTime ^ 2)
+            target = getClosestPlayerToCursor(shared.fov)
+            circle.Position = get_mouse_location()
+        end)
+
+        local OldNamecall
+        OldNamecall = hookmetamethod(workspace, '__namecall', newcclosure(function(...)
+            local args = { ... }
+            local method = string.lower(getnamecallmethod())
+            local caller = getcallingscript()
+            if method == 'findpartonraywithwhitelist' and tostring(caller) == 'First Person Controller' then
+
+                local HitPart = target and target.Character and target.Character.Head or nil
+                if HitPart then
+                    local Origin = HitPart.Position + Vector3.new(0, 5, 0)
+                    local Direction = (HitPart.Position - Origin)
+                    args[2] = Ray.new(Origin, Direction)
+
+                    return OldNamecall(unpack(args))
+                else
+                    return OldNamecall(...)
+                end
+            end
+            return OldNamecall(...)
+        end))
+
+        Rayfield:Notify({
+            Title = "SnowHubv2 Success!",
+            Content = "Silent Aim has been Applied!",
+            Duration = 4,
+            Image = icons.NotificationIcons.Success,
+        })
+    end,
+})
+
+
+local ESPButton = MainTab:CreateButton({
+    Name = "Highlight",
+    Info = "Enables Highlight ESP",
+    Interact = 'desc',
+    Callback = function()
+        -- Simple Highlight ESP :)
+        local Highlight = Instance.new("Highlight")
+        Highlight.Name = "Highlight"
+
+        function ApplyToCurrentEnemyPlayers()
+            for i,v in pairs(game.Players:GetPlayers()) do
+                if v.Team ~= game.Players.LocalPlayer.Team then
+                    repeat wait() until v.Character
+                    if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
+                        local HighlightClone = Highlight:Clone()
+                        HighlightClone.Adornee = v.Character
+                        HighlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart")
+                        HighlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        HighlightClone.Name = "Highlight"
+                    end
+                end
             end
         end
-    end
-end    
 
-RunService.Heartbeat:Connect(function()
-    ApplyToCurrentEnemyPlayers()
-end)
+        RunService.Heartbeat:Connect(function()
+            ApplyToCurrentEnemyPlayers()
+        end)
+
+        Rayfield:Notify({
+            Title = "SnowHubv2 Success!",
+            Content = "Highlight ESP has been Applied!",
+            Duration = 4,
+            Image = icons.NotificationIcons.Success,
+        })
+    end,
+})
 
 
-shared.fov = 400
-local circle = Drawing.new('Circle')
-circle.Thickness = 2
-circle.NumSides = 12
-circle.Radius = shared.fov or 400
-circle.Filled = false
-circle.Transparency = 1
-circle.Color = Color3.new(1, 0, 0.384313)
-circle.Visible = true
-local target = nil
-RunService.Heartbeat:Connect(function(deltaTime)
-    task.wait(deltaTime ^ 2)
-    target = getClosestPlayerToCursor(shared.fov)
-    circle.Position = get_mouse_location()
-end)
-
-local OldNamecall
-OldNamecall = hookmetamethod(workspace, '__namecall', newcclosure(function(...)
-    local args = { ... }
-    local method = string.lower(getnamecallmethod())
-    local caller = getcallingscript()
-    if method == 'findpartonraywithwhitelist' and tostring(caller) == 'First Person Controller' then
-
-        local HitPart = target and target.Character and target.Character.Head or nil
-        if HitPart then
-            local Origin = HitPart.Position + Vector3.new(0, 5, 0)
-            local Direction = (HitPart.Position - Origin)
-            args[2] = Ray.new(Origin, Direction)
-
-            return OldNamecall(unpack(args))
-        else
-            return OldNamecall(...)
-        end
-    end
-    return OldNamecall(...)
-end))
+Rayfield:LoadConfiguration()
